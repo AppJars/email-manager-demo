@@ -1,0 +1,119 @@
+/*-
+ * #%L
+ * Email Manager AppJars - Demo
+ * %%
+ * Copyright (C) 2023 - 2026 Flowing Code
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+vaadin-scroller[slot="drawer"] {
+  padding: var(--lumo-space-s);
+}
+
+vaadin-side-nav-item vaadin-icon {
+  padding: 0;
+}
+
+[slot="drawer"]:is(header, footer) {
+  display: flex;
+  align-items: center;
+  gap: var(--lumo-space-s);
+  padding: var(--lumo-space-s) var(--lumo-space-m);
+  min-height: var(--lumo-size-xl);
+  box-sizing: border-box;
+}
+
+[slot="drawer"]:is(header, footer):is(:empty) {
+  display: none;
+}
+
+/* Landing page (HomeView) — generic home-* classes, meant to be reused across demos */
+.home-view {
+  margin: 0 auto;
+  max-width: 60rem;
+  padding: var(--lumo-space-l);
+}
+
+.home-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--lumo-space-s);
+  text-align: center;
+  padding-bottom: var(--lumo-space-m);
+}
+
+.home-hero .home-logo {
+  margin-bottom: var(--lumo-space-s);
+}
+
+.home-hero .home-tagline {
+  color: var(--lumo-secondary-text-color);
+  font-size: var(--lumo-font-size-l);
+  max-width: 44rem;
+  margin: 0;
+}
+
+.home-section {
+  padding-top: var(--lumo-space-m);
+}
+
+.home-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--lumo-space-m);
+}
+
+.home-feature-icon {
+  color: var(--lumo-primary-color);
+}
+
+.home-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--lumo-space-s);
+  flex-wrap: wrap;
+  padding-top: var(--lumo-space-m);
+}
+
+.home-actions vaadin-menu-bar vaadin-menu-bar-button > div {
+  display: flex;
+  align-items: center;
+  gap: var(--lumo-space-xs);
+}
+
+.home-links {
+  display: flex;
+  gap: var(--lumo-space-l);
+  flex-wrap: wrap;
+}
+
+/* While a guided tour is active, keep menu/popover overlays above the tour engine's dim layer
+   so the programmatically opened menus stay visible next to the tour steps */
+html.demo-tour-active vaadin-menu-bar-overlay,
+html.demo-tour-active vaadin-popover-overlay {
+  z-index: 10000;
+}
+
+/* Vaadin renders its overlays in the browser top layer (popover="manual"), which paints above
+   anything outside it whatever its z-index, so an open dialog would cover Driver's popover and its
+   Next/close controls. DemoTours promotes the popover into the top layer too while such an overlay
+   is open (see OVERLAY_TOP_LAYER_HOOK_JS); this undoes the UA styles that come with the popover
+   attribute — notably `inset: 0`, which would stretch it — while leaving Driver's own inline
+   positioning and colors in place. */
+.driver-popover[popover] {
+  inset: unset;
+  margin: 0;
+  overflow: visible;
+}

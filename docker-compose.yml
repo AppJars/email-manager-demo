@@ -1,0 +1,24 @@
+name: email-manager-demo
+
+services:
+  # SMTP server for trying out mail delivery locally. It captures
+  # every message the demo sends and serves them at http://localhost:8025.
+  #
+  # Optional: the demo runs without it, sends just fail.
+  mailpit:
+    image: axllent/mailpit:v1.31
+    container_name: email-manager-demo-mailpit
+    ports:
+      - "1025:1025"   # SMTP
+      - "8025:8025"   # web inbox
+    environment:
+      # Accept whatever credentials arrive, so the stack keeps working if you
+      # point a configuration with mail.smtp.auth=true at it.
+      - MP_SMTP_AUTH_ACCEPT_ANY=1
+      - MP_SMTP_AUTH_ALLOW_INSECURE=1
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
