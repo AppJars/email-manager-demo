@@ -23,6 +23,7 @@ import com.appjars.emailmanager.demo.views.tour.DemoTours;
 import com.appjars.emailmanager.demo.views.tour.DemoTours.DemoTour;
 import com.appjars.emailmanager.demo.views.tour.TourMenu;
 import com.appjars.emailmanager.flow.view.EmailCrudView;
+import com.appjars.emailmanager.flow.view.TemplateCrudView;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.html.Footer;
@@ -117,6 +118,10 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
         new SideNavItem(
             getTranslation("appjars.emailmanager.demo.menuitem.emailList"),
             EmailCrudView.class));
+    emailManagerItem.addItem(
+        new SideNavItem(
+            getTranslation("appjars.emailmanager.demo.menuitem.templateList"),
+            TemplateCrudView.class));
 
     nav.addItem(homeItem, emailManagerItem);
 
@@ -147,7 +152,10 @@ public class MainLayout extends AppLayout implements AfterNavigationObserver {
     if (session.getAttribute(DemoTours.PENDING_TOUR_ATTRIBUTE) instanceof DemoTour pending
         && getContent() != null) {
       Class<?> target = getContent().getClass();
-      boolean matches = pending == DemoTour.EMAILS && EmailCrudView.class.equals(target);
+      boolean matches = switch (pending) {
+        case EMAILS -> EmailCrudView.class.equals(target);
+        case TEMPLATES -> TemplateCrudView.class.equals(target);
+      };
       if (matches) {
         session.setAttribute(DemoTours.PENDING_TOUR_ATTRIBUTE, null);
         DemoTours.start(pending, this, this::getTranslation);

@@ -21,6 +21,7 @@ package com.appjars.emailmanager.demo.views;
 
 import com.appjars.emailmanager.demo.views.tour.TourMenu;
 import com.appjars.emailmanager.flow.view.EmailCrudView;
+import com.appjars.emailmanager.flow.view.TemplateCrudView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -87,6 +88,8 @@ public class HomeView extends VerticalLayout implements HasDynamicTitle {
         featureCard(VaadinIcon.FLAG, "features.status"),
         featureCard(VaadinIcon.WARNING, "features.errors"),
         featureCard(VaadinIcon.CODE, "features.html"),
+        featureCard(VaadinIcon.FILE_TEXT_O, "features.templates"),
+        featureCard(VaadinIcon.MAGIC, "features.placeholders"),
         featureCard(VaadinIcon.PAPERCLIP, "features.attachments"),
         featureCard(VaadinIcon.SEARCH, "features.filters"));
     cards.addClassName("home-features");
@@ -112,8 +115,11 @@ public class HomeView extends VerticalLayout implements HasDynamicTitle {
         e -> getUI().ifPresent(ui -> ui.navigate(EmailCrudView.class)));
     emails.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 
+    Button templates = new Button(t("tryit.templates"),
+        e -> getUI().ifPresent(ui -> ui.navigate(TemplateCrudView.class)));
+
     // Same menu as the navbar's (see MainLayout), so both entry points behave identically.
-    Div actions = new Div(emails, new TourMenu());
+    Div actions = new Div(emails, templates, new TourMenu());
     actions.addClassName("home-actions");
 
     return section("home-tryit", t("tryit.title"), intro, actions);

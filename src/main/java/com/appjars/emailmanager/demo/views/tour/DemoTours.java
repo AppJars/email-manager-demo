@@ -183,16 +183,18 @@ public final class DemoTours {
    *
    * {@code $0} and {@code $1} are the translated titles of those two steps: Driver puts no step id on
    * the DOM, so the rendered popover title is what identifies the current step (same technique as
-   * {@link #MENU_HOOK_JS}).
+   * {@link #MENU_HOOK_JS}). {@code $2}, {@code $3} and {@code $4} are the create-button, dialog and
+   * cancel-button selectors, so the same script drives the compose dialog of the e-mails tour and
+   * the editor dialog of the templates tour; only one tour runs at a time, so they share a global.
    */
   private static final String COMPOSE_HOOK_JS =
       """
       if (window.__demoTourCompose) { window.__demoTourCompose.stop(); }
       const CREATE_TITLE = $0;
       const COMPOSE_TITLE = $1;
-      const CREATE_BUTTON = "[data-testid='create-button']";
-      const DIALOG = "[data-testid='email-dialog']";
-      const CANCEL = "[data-testid='cancel-dialog']";
+      const CREATE_BUTTON = $2;
+      const DIALOG = $3;
+      const CANCEL = $4;
       const DISCARD = 'vaadin-confirm-dialog [slot="confirm-button"]';
       // What a dialog slots outside its content layout: its own footer buttons, and the buttons of
       // the discard-changes prompt. They sit outside whatever the step highlights, so Driver leaves
@@ -282,7 +284,7 @@ public final class DemoTours {
       "if (window.__demoTourCompose) { window.__demoTourCompose.stop(); }";
 
   public enum DemoTour {
-    EMAILS
+    EMAILS, TEMPLATES
   }
 
   private DemoTours() {}
@@ -290,6 +292,7 @@ public final class DemoTours {
   public static Tour create(DemoTour tour, SerializableFunction<String, String> translator) {
     List<TourStep> steps = switch (tour) {
       case EMAILS -> emailsSteps(translator);
+      case TEMPLATES -> templatesSteps(translator);
     };
     return Tour.builder().engineType(EngineType.DRIVER).steps(steps).showCancelButton(true)
         .allowClose(true).build();
@@ -306,12 +309,26 @@ public final class DemoTours {
     t.addTourCompletedListener(e -> stop(t, host));
     t.addTourCanceledListener(e -> stop(t, host));
     t.start();
-    host.getElement().executeJs(MENU_HOOK_JS, translator.apply(KEY_PREFIX + "emails.actions.title"));
+    // Only the e-mails tour has a row-actions step; passing a title no popover ever shows leaves the
+    // menu hook armed but idle for the other tour.
+    host.getElement().executeJs(MENU_HOOK_JS,
+        tour == DemoTour.EMAILS ? translator.apply(KEY_PREFIX + "emails.actions.title") : "");
     host.getElement().executeJs(TOUR_CSS_JS);
     host.getElement().executeJs(OVERLAY_TOP_LAYER_HOOK_JS);
-    host.getElement().executeJs(COMPOSE_HOOK_JS,
-        translator.apply(KEY_PREFIX + "emails.create.title"),
-        translator.apply(KEY_PREFIX + "emails.compose.title"));
+    switch (tour) {
+      case EMAILS -> host.getElement().executeJs(COMPOSE_HOOK_JS,
+          translator.apply(KEY_PREFIX + "emails.create.title"),
+          translator.apply(KEY_PREFIX + "emails.compose.title"),
+          "[data-testid='create-button']",
+          "[data-testid='email-dialog']",
+          "[data-testid='cancel-dialog']");
+      case TEMPLATES -> host.getElement().executeJs(COMPOSE_HOOK_JS,
+          translator.apply(KEY_PREFIX + "templates.create.title"),
+          translator.apply(KEY_PREFIX + "templates.editor.title"),
+          "[data-testid='template-create-button']",
+          "[data-testid='template-dialog']",
+          "[data-testid='template-cancel-dialog']");
+    }
   }
 
   // Not reached while a modal dialog is open: Flow marks components outside the dialog inert and
@@ -341,6 +358,18 @@ public final class DemoTours {
         // No Back button either: the compose step it would return to has had its dialog closed.
         stepNoBack(t, "emails.actions", null, null),
         step(t, "emails.license", null, null, false, true));
+  }
+
+  private static List<TourStep> templatesSteps(SerializableFunction<String, String> t) {
+    return List.of(
+        step(t, "templates.grid", "vaadin-grid", "top", true, false),
+        step(t, "templates.filters", "#template-top-filters", "bottom", false, false),
+        // Same chaining as the compose steps of the e-mails tour: the visitor's own click opens the
+        // editor dialog, and highlighting that dialog is what makes it usable while the tour runs.
+        stepAdvanceOnly(t, "templates.create", "[data-testid='template-create-button']", "bottom"),
+        stepNoBack(t, "templates.editor", "[data-testid='template-dialog']", "left"),
+        stepNoBack(t, "templates.placeholders", null, null),
+        step(t, "templates.apply", null, null, false, true));
   }
 
   private static TourStep step(SerializableFunction<String, String> t, String key, String attachTo,
