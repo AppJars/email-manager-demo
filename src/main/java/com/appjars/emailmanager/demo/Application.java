@@ -22,10 +22,12 @@ package com.appjars.emailmanager.demo;
 import com.appjars.AppJarsAutoConfiguration;
 import com.appjars.emailmanager.EmailManagerAutoConfiguration;
 import com.appjars.emailmanager.demo.util.EmailGenerator;
+import com.appjars.emailmanager.demo.util.TemplateGenerator;
 import com.appjars.emailmanager.demo.views.MainLayout;
 import com.appjars.emailmanager.flow.util.RouteConfigurer;
 import com.appjars.emailmanager.service.EmailService;
 import com.appjars.emailmanager.service.MailSenderService;
+import com.appjars.emailmanager.service.TemplateService;
 import com.vaadin.flow.component.dependency.StyleSheet;
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.server.PWA;
@@ -74,12 +76,16 @@ public class Application extends SpringBootServletInitializer implements AppShel
 
     private final MailSenderService mailSenderTask;
 
+    private final TemplateService templateService;
+
     final RouteConfigurer routeConfigurer;
 
-    public Application(Environment env, EmailService emailService, MailSenderService mailSenderTask, RouteConfigurer routeConfigurer) {
+    public Application(Environment env, EmailService emailService, MailSenderService mailSenderTask,
+            TemplateService templateService, RouteConfigurer routeConfigurer) {
         this.env = env;
         this.emailService = emailService;
         this.mailSenderTask = mailSenderTask;
+        this.templateService = templateService;
         this.routeConfigurer = routeConfigurer;
     }
 
@@ -98,6 +104,10 @@ public class Application extends SpringBootServletInitializer implements AppShel
 
         if (emailService.findAll().isEmpty()) {
             EmailGenerator.sampleEmails().forEach(emailService::save);
+        }
+
+        if (templateService.findAll().isEmpty()) {
+            TemplateGenerator.sampleTemplates().forEach(templateService::save);
         }
 
         // Get the cron expression from application.properties and validate it
