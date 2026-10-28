@@ -22,6 +22,7 @@ package com.appjars.emailmanager.demo.views.tour;
 import com.appjars.emailmanager.demo.views.MainLayout;
 import com.appjars.emailmanager.demo.views.tour.DemoTours.DemoTour;
 import com.appjars.emailmanager.flow.view.EmailCrudView;
+import com.appjars.emailmanager.flow.view.TemplateCrudView;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.html.Div;
@@ -47,6 +48,8 @@ public class TourMenu extends MenuBar {
     // Guided tours cover the appjar's views and their configurations, not this landing page.
     tours.addItem(getTranslation(KEY_PREFIX + "tour.emails"),
         e -> startViewTour(DemoTour.EMAILS, EmailCrudView.class));
+    tours.addItem(getTranslation(KEY_PREFIX + "tour.templates"),
+        e -> startViewTour(DemoTour.TEMPLATES, TemplateCrudView.class));
   }
 
   // Navigating to the view a tour runs on is what starts it (see MainLayout.startPendingTour). When

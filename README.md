@@ -1,16 +1,10 @@
 # Email Manager Demo
 
-A ready-to-run demonstration of the **AppJars Email Manager** — an AppJar that adds e-mail
-management to a Vaadin Flow application: composing messages with recipients, CC and BCC, an HTML or
-plain-text body and attachments, holding them in a send queue, delivering them over SMTP, and
-keeping a full audit trail of every delivery attempt.
+A ready-to-run demonstration of the **AppJars Email Manager**, which adds e-mail management and reusable templates to a Vaadin Flow application. Compose messages with recipients, CC and BCC, HTML or plain-text bodies and attachments, queue them for SMTP delivery, and inspect every delivery attempt.
 
-It runs entirely on your machine on a file-based H2 database, with **no login and nothing to
-configure**. The e-mail list arrives pre-populated with sample messages in every delivery state, so
-every feature is one click away the moment the application starts.
+It runs entirely on your machine on a file-based H2 database, with **no login and nothing to configure**. Sample e-mails cover every delivery state, and sample templates demonstrate the editor and the compose-time template picker.
 
-The demo opens on a public landing page that summarizes the features and offers a **guided tour** of
-the e-mail view.
+The demo opens on a public landing page that summarizes the features and offers **guided tours** of the e-mail and template views. It uses Email Manager 2.1.0 from the public AppJars Maven repository.
 
 Visit the official [AppJars documentation](https://docs.appjars.com) for more information.
 
@@ -31,9 +25,9 @@ action:
 | **Send failed** | 2 | Carry a captured failure reason you can inspect with **Show error details**, then retry |
 
 
-The sample set lives in
-[`EmailGenerator`](src/main/java/com/appjars/emailmanager/demo/util/EmailGenerator.java) if you want
-to change what gets seeded.
+The sample set lives in [`EmailGenerator`](src/main/java/com/appjars/emailmanager/demo/util/EmailGenerator.java) if you want to change what gets seeded.
+
+The **Templates** view starts with five samples: an HTML shipping notice with a Spanish variant, a plain-text password reset, a monthly report with an undeclared placeholder that demonstrates the editor's warning, and an inactive announcement. [`TemplateGenerator`](src/main/java/com/appjars/emailmanager/demo/util/TemplateGenerator.java) defines them, and [`DemoPlaceholderCatalog`](src/main/java/com/appjars/emailmanager/demo/service/DemoPlaceholderCatalog.java) adds application placeholders to the editor palette. Templates are seeded only when the template list is empty.
 
 ---
 
