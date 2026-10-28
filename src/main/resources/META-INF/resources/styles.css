@@ -117,3 +117,9 @@ html.demo-tour-active vaadin-popover-overlay {
   margin: 0;
   overflow: visible;
 }
+
+/* Driver's all:unset otherwise makes promoted popovers inherit disabled pointer events. */
+html.demo-tour-active .driver-popover,
+html.demo-tour-active .driver-popover * {
+  pointer-events: auto;
+}

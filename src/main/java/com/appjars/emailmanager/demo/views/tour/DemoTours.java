@@ -124,8 +124,12 @@ public final class DemoTours {
       """
       if (window.__demoTourTopLayer) { window.__demoTourTopLayer.stop(); }
       const popover = () => document.querySelector('.driver-popover');
-      const overlayOpen = () => Array.from(document.querySelectorAll('[popover]'))
-          .some(el => !el.classList.contains('driver-popover') && el.matches(':popover-open'));
+      const overlayHosts = () => document.querySelectorAll(
+          'vaadin-dialog, vaadin-confirm-dialog, vaadin-menu-bar-submenu, vaadin-popover');
+      const overlayOpen = () => Array.from(overlayHosts()).some(el =>
+          el.opened || el.shadowRoot?.querySelector('[popover]:popover-open'));
+      const roots = new Set();
+      let seenPopover = false;
       const promote = () => {
         const el = popover();
         if (!el) { return; }
@@ -136,7 +140,6 @@ public final class DemoTours {
         try { el.hidePopover(); } catch (e) { /* already hidden */ }
         el.removeAttribute('popover');
       });
-      const sync = () => { if (overlayOpen()) { promote(); } else { demote(); } };
       const onToggle = (e) => {
         const t = e.target;
         if (!t || !t.classList || t.classList.contains('driver-popover')) { return; }
@@ -147,13 +150,33 @@ public final class DemoTours {
           try { el.hidePopover(); el.showPopover(); } catch (e2) { /* n/a */ }
         }
       };
+      const sync = () => {
+        overlayHosts().forEach(el => {
+          const root = el.shadowRoot;
+          if (root && !roots.has(root)) {
+            root.addEventListener('toggle', onToggle, true);
+            roots.add(root);
+          }
+        });
+        if (popover()) { seenPopover = true; }
+        else if (seenPopover) {
+          window.__demoTourMenus?.stop();
+          window.__demoTourCompose?.stop();
+          document.getElementById('demo-tour-css')?.remove();
+          window.__demoTourTopLayer?.stop();
+          return;
+        }
+        if (overlayOpen()) { promote(); } else { demote(); }
+      };
       document.addEventListener('toggle', onToggle, true);
       const obs = new MutationObserver(sync);
-      obs.observe(document.body, {childList: true, subtree: true});
+      obs.observe(document.body, {childList: true, subtree: true,
+          attributes: true, attributeFilter: ['opened', 'aria-expanded']});
       window.__demoTourTopLayer = {
         stop() {
           obs.disconnect();
           document.removeEventListener('toggle', onToggle, true);
+          roots.forEach(root => root.removeEventListener('toggle', onToggle, true));
           demote();
           window.__demoTourTopLayer = null;
         }
@@ -200,8 +223,13 @@ public final class DemoTours {
       // the discard-changes prompt. They sit outside whatever the step highlights, so Driver leaves
       // them dead; an inline style is what reliably wins over driver.css, whatever the document and
       // shadow cascades do between them.
-      const CHROME = '[slot="footer"], [slot="confirm-button"], [slot="cancel-button"]';
+      const CHROME = '[slot="footer"] vaadin-button, [slot="confirm-button"], [slot="cancel-button"]';
       const isVisible = (el) => {
+        if (el.matches('vaadin-dialog, vaadin-confirm-dialog')) {
+          if (!el.opened) { return false; }
+          return Array.from(el.querySelectorAll('vaadin-dialog-content:not([slot]) > *'))
+              .some(child => isVisible(child));
+        }
         const r = el.getBoundingClientRect();
         return r.width > 0 && r.height > 0;
       };
@@ -367,7 +395,9 @@ public final class DemoTours {
         // Same chaining as the compose steps of the e-mails tour: the visitor's own click opens the
         // editor dialog, and highlighting that dialog is what makes it usable while the tour runs.
         stepAdvanceOnly(t, "templates.create", "[data-testid='template-create-button']", "bottom"),
-        stepNoBack(t, "templates.editor", "[data-testid='template-dialog']", "left"),
+        stepNoBack(t, "templates.editor",
+            "[data-testid='template-dialog'] vaadin-dialog-content:not([slot]) > vaadin-vertical-layout",
+            "left"),
         stepNoBack(t, "templates.placeholders", null, null),
         step(t, "templates.apply", null, null, false, true));
   }
